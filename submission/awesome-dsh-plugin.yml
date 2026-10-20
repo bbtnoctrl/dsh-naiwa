@@ -1,0 +1,14 @@
+# 上架 awesome-dsh-plugin 用的条目。
+# 用法：把本文件复制到 awesome-dsh-plugin 仓库的 data/plugins/<owner>__<repo>.yml，
+# 把 OWNER 换成你的 GitHub 用户名，然后提 PR。
+#
+# 提之前确认三件事：
+#   1. 仓库已带 dsh-plugin topic
+#   2. 仓库创建满 24 小时
+#   3. package.json 里有 dsh.bundle（已有）
+url: https://github.com/bbtnoctrl/dsh-naiwa
+name: bbtnoctrl/dsh-naiwa
+category: fun
+description:
+  en: Make the Naiwa desktop pet laugh when a DeepSeek Harness agent turn ends.
+  zh: 每轮 DSH 回答结束时，让奶蛙桌宠捧腹大笑一次。

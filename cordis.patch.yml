@@ -1,0 +1,4 @@
+# naiwa-laugh bundle patch: one host row, no client half.
+- insert:
+    - id: naiwa-laugh
+      name: 'naiwa-laugh'
