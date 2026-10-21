@@ -3,7 +3,9 @@ param(
   [string]$LogPath = "",
   [int]$TimeoutMs = 8000,
   # Skip the WM_APP+3 path and use the synthetic double click (testing / stock builds).
-  [switch]$PreferClick
+  [switch]$PreferClick,
+  # Only make sure the pet is running (used when DSH starts), do not trigger a laugh.
+  [switch]$EnsureOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -52,6 +54,12 @@ if ($hwnd -eq [IntPtr]::Zero) {
 if ($hwnd -eq [IntPtr]::Zero) {
   Write-Log "pet window did not appear"
   exit 3
+}
+
+# Startup mode: only make sure the pet is running, do not make it laugh.
+if ($EnsureOnly) {
+  Write-Log "pet is running"
+  exit 0
 }
 
 # Path A: the patched build answers WM_APP+3 and laughs with auto-stand.
