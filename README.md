@@ -28,13 +28,23 @@ DSH 一打开 → 奶蛙自动出现在桌面上（已经在运行就不动它�
 
 ## 安装
 
-### 从 GitHub 安装
+### 从 dsh-market 安装（推荐）
+
+在 DSH 的**插件市场**里搜 `naiwa` 或 `奶蛙`（分类：娱乐 / fun），点「安装」。
+
+**不需要执行任何命令**——市场点一下，等价于下面的命令行。
+
+### 用命令行从 GitHub 安装
+
+不用市场、或市场里搜不到时：
 
 ```powershell
 dsh plugin --profile desktop add github:bbtnoctrl/dsh-naiwa
 ```
 
 ### 从本地目录安装（开发/自用）
+
+已经 clone 或解压到本地时：
 
 ```powershell
 dsh plugin --profile desktop add C:\path\to\naiwa-laugh
