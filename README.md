@@ -6,11 +6,14 @@
 
 ## 效果
 
-DSH 里每轮 agent 回答结束 → 奶蛙播放约 14 秒的捧腹大笑。
+DSH 一打开 → 奶蛙自动出现在桌面上（已经在运行就不动它）。
+每轮 agent 回答结束 → 奶蛙播放约 14 秒的捧腹大笑，然后自己站起来。
 
 - 桌宠没在运行时，插件会尝试自动把它拉起来
 - 3 秒防抖，连续触发不会叠加
 - 任何失败都只写日志，**不会影响回答本身**
+
+不想让它开机就出现的话，在配置里加 `"startOnLoad": false`。
 
 ## 已知限制
 
@@ -41,9 +44,29 @@ dsh plugin --profile desktop add C:\path\to\naiwa-laugh
 
 ## 配置（多数情况不用管）
 
-插件会**自动寻找**奶蛙桌宠，搜索范围：`下载 / 桌面 / 文档 / 用户目录` 以及 `D:` `E:` `F:` 盘，最多 3 层、最多 4 秒。找到后会把路径记进配置，下次直接用。
+插件会**自动寻找**奶蛙桌宠，判定方式是「目录里有没有 `素材.nwp`」——所以就算你把 exe 改了名也能认出来。
 
-如果你自己改了路径，或者桌宠放在别处，可以手动指定。创建 `%USERPROFILE%\.dsh\naiwa-laugh.json`：
+搜索范围：
+
+| 位置 | 深度 |
+|---|---|
+| `D:\` `E:\` `F:\` `G:\`（盘根） | 3 层 |
+| `下载` / `桌面` / `文档` | 3 层 |
+| 用户目录 | 2 层 |
+| `C:\` | 2 层 |
+
+上限 3000 个目录、8 秒，**在后台异步跑，不阻塞 DSH 启动**。找到后会把路径写进配置文件，以后直接读，不再扫描。
+
+如果同时放了多个桌宠（比如同一源码改出来的变体），会**优先选名字带「奶蛙」的那个**。
+
+### 扫不到的几种情况
+
+- 放在 `C:\Program Files\` 里，或 `C:\` 下超过 2 层
+- 放在没列出来的盘（比如 H 盘）
+- 整个文件夹在 OneDrive 同步目录里
+- `素材.nwp` 被删掉或改名了
+
+这时手动指定即可。创建 `%USERPROFILE%\.dsh\naiwa-laugh.json`：
 
 ```json
 {
@@ -52,6 +75,13 @@ dsh plugin --profile desktop add C:\path\to\naiwa-laugh
 ```
 
 > 路径要写到 **exe 本身**，不是文件夹。也可以用正斜杠：`"C:/Users/.../奶蛙桌宠.exe"`。
+
+同一份配置里还能加：
+
+| 字段 | 默认 | 作用 |
+|---|---|---|
+| `exePath` | 自动探测 | 桌宠 exe 的完整路径 |
+| `startOnLoad` | `true` | DSH 启动时是否自动把桌宠叫起来 |
 
 也可以在 profile 的 `cordis.patch.yml` 里用 `config.exePath` 覆盖（优先级更高）。
 
@@ -76,8 +106,9 @@ dsh plugin --profile desktop add C:\path\to\naiwa-laugh
 |---|---|
 | 没有 `plugin loaded` | 插件没挂载，检查 `dsh plugin list` 和 bundles 列表 |
 | 没有 `trigger via` | 事件没到，确认 DSH 版本有 `agent/turn-stopping` 接缝 |
-| `exePath not configured` | 按上面「配置」写 json |
-| `pet window did not appear` | exe 路径错，或桌宠启动失败 |
+| `auto-detect: no pet exe found` | 扫描没找到桌宠，按上面「扫不到的几种情况」手填 `exePath` |
+| `exePath not configured` | 同上，配置文件里还没写路径 |
+| `pet window did not appear` | exe 路径错；或者你装的是**别的变体桌宠**（窗口标题不是 `NaiwaDesktop.Source.v1`），本插件只驱动奶蛙 |
 | `trigger sent but state=` | 桌宠收到了但没进入大笑，可能窗口标题变了 |
 
 ## 卸载
@@ -96,7 +127,7 @@ dsh plugin --profile desktop remove naiwa-laugh
 
 ## English
 
-A DSH plugin that makes the **Naiwa desktop pet** laugh once whenever an agent turn ends.
+A DSH plugin that makes the **Naiwa desktop pet** laugh once whenever an agent turn ends, and brings it up as soon as DSH starts.
 
 It ships **no** pet binary or artwork — you install the pet yourself from its original author. The plugin only sends window messages to it.
 
@@ -104,6 +135,12 @@ It ships **no** pet binary or artwork — you install the pet yourself from its 
 dsh plugin --profile desktop add github:bbtnoctrl/dsh-naiwa
 ```
 
-Configure `%USERPROFILE%\.dsh\naiwa-laugh.json` with `{"exePath":"C:\\...\\奶蛙桌宠.exe"}`, then restart DSH.
+The plugin auto-detects the pet by looking for a folder that contains `素材.nwp` (so a renamed exe still works): drive roots `D:`–`G:` and `Downloads`/`Desktop`/`Documents` down to 3 levels, `C:\` to 2. Up to 3000 folders / 8 s, in the background. When several pets are present it prefers the one named 奶蛙.
 
-Works with both the stock pet (synthetic double-click) and a patched build that understands `WM_APP+3` (detected automatically). Logs to `%USERPROFILE%\.dsh\naiwa-laugh.log`.
+If it cannot find yours, create `%USERPROFILE%\.dsh\naiwa-laugh.json`:
+
+```json
+{ "exePath": "C:\\...\\奶蛙桌宠.exe", "startOnLoad": true }
+```
+
+Then restart DSH. Works with both the stock pet (synthetic double-click) and a patched build that understands `WM_APP+3` (detected automatically). Logs to `%USERPROFILE%\.dsh\naiwa-laugh.log`.
